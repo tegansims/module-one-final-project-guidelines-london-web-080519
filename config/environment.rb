@@ -1,6 +1,7 @@
 require 'bundler'
 require "sinatra/activerecord"
 require 'faker' 
+require 'tty-prompt'
 
 Bundler.require
 

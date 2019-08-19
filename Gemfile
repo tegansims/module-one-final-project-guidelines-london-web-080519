@@ -10,3 +10,4 @@ gem "require_all"
 gem "rake"
 gem "database_cleaner"
 gem 'faker'
+gem 'tty-prompt'

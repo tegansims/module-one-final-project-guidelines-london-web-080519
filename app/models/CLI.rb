@@ -20,20 +20,7 @@ class CLI
         end 
     end  
 
-    # def user_create(name, username, password)
-    #     User.create(name, username, password)
-    # end 
-
-    # def get_user_instance(username)
-    #     User.find_by(username: username)
-    # end 
-
-    # def password_valid?(username, password)
-    #     user = get_user_instance(username) 
-    #     user.password == password? 
-    # end 
-
-    def self.account_login 
+    def self.account_login #NEED TO PUT A COUNTER IN HERE TO STOP THE LOOP IF FORGOTTEN
         user_username = @prompt.ask("Enter username")
         user_password = @prompt.mask("Enter password")
         user = User.find_by(username: user_username, password: user_password)
@@ -57,33 +44,12 @@ class CLI
         end 
     end 
 
-     def self.show_matches
-        puts "TO BUILD: What's your partner username?"
-        puts "TO BUILD: here are all your matches"
-     end
+  
      
      def self.upload_own_name
         puts "TO BUILD: give us your choice of name"
         puts "TO BUILD: is this a pick or a reject?"
      end
-     
-     def self.show_picks
-        puts "TO BUILD: here are all your picks"
-     end
-     
-     def self.show_rejects
-        puts "TO BUILD: here are all your rejects"
-     end
-     
-     def self.log_out
-        puts "TO BUILD: bye bye, set current_user to nil"
-     end
-     
-     def self.delete_account
-        puts "TO BUILD: you sure, buddy?"
-        puts "TO BUILD: ok, destroy self.user, destroy self.user_picks"
-     end
-     
      
      def self.home_menu
         options = [
@@ -97,6 +63,19 @@ class CLI
         ]
         @prompt.select("here are your options:", options)
      end
+#  #------------- SHOW NAMES ---------------------- 
+#  def self.show_picks(yn)
+#     Pick.where(user_id: @current_user.id, yes_or_no: yn)
+#  end
+ 
+#  def self.show_rejects
+#     puts "TO BUILD: here are all your rejects"
+#  end
+
+#  def self.show_matches
+#     puts "TO BUILD: What's your partner username?"
+#     puts "TO BUILD: here are all your matches"
+#  end
 
  #------------- RANDOM NAME ---------------------- 
 
@@ -112,8 +91,6 @@ class CLI
     def self.get_random_name 
         Name.all.sample
     end 
-    
-    
 
     def self.random_name_all 
         random_name = get_random_name 
@@ -146,24 +123,36 @@ class CLI
     # if no take them back to main menu 
 
 
+#---------------------------DELETE ACCOUNT HERE---------------------------------------------
+    def self.destroy_account
+        puts "TO BUILD: this is where we delete it"
+        user_delete_picks = Pick.where(user_id: @current_user.id)
+        user_delete_picks.destroy_all
+        User.destroy(@current_user.id)
+    end
 
+    def self.delete_account
+        options = [
+            {"Yes, please delete my account" => -> do destroy_account end},
+            {"No, please take me back to the menu!" => -> do self.home_menu end}
+        ]
+        @prompt.select("Are you sure? This will erase all your account info and history.", options)
+    end
 
+#---------------------------LOG_OUT METHOD HERE---------------------------------------------
 
-
-
-
-
-    
-
-
-
-
+    def self.log_out
+        puts "Thank you for using Kindr! See you again soon."
+        @current_user = nil
+    end
 #---------------------------RUN METHOD HERE---------------------------------------------
 
     def self.methods 
         self.greet
         self.check_if_have_login_and_create
-        self.random_name_all
+        self.home_menu
+        # self.random_name_all
+        # self.delete_account
     end 
 
 

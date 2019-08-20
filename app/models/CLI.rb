@@ -56,26 +56,26 @@ class CLI
             {"Random name" => -> do get_random_name end},
             {"Show my matches" => -> do show_matches end},
             {"Upload own name" => -> do upload_own_name end},
-            {"Show my Picks" => -> do show_picks end},
-            {"Show my Rejects" => -> do show_rejects end},
+            {"Show my Picks" => -> do show_picks("Y") end},
+            {"Show my Rejects" => -> do show_picks("N") end},
             {"Log Out" => -> do log_out end},
             {"Delete account" => -> do delete_account end},
         ]
         @prompt.select("here are your options:", options)
      end
 #  #------------- SHOW NAMES ---------------------- 
-#  def self.show_picks(yn)
-#     Pick.where(user_id: @current_user.id, yes_or_no: yn)
-#  end
- 
-#  def self.show_rejects
-#     puts "TO BUILD: here are all your rejects"
-#  end
+ def self.show_picks(yn)
+    picks = Pick.where(user_id: @current_user.id, yes_or_no: yn)
+    picks_array = picks.map {|pick| pick.name.name}
+    print picks_array
+ end
 
-#  def self.show_matches
-#     puts "TO BUILD: What's your partner username?"
-#     puts "TO BUILD: here are all your matches"
-#  end
+
+ 
+ def self.show_matches
+    puts "TO BUILD: What's your partner username?"
+    puts "TO BUILD: here are all your matches"
+ end
 
  #------------- RANDOM NAME ---------------------- 
 

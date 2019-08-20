@@ -123,9 +123,9 @@ class CLI
             self.random_name_all(gender)     
         else 
             puts "your name is #{@random_name.name}"
-            like_or_not
         end 
     end 
+    #think of way to tell user that they have run out of names - B/C WILL KEEP LOOPING 
 
     # like_or_not => 
     def self.like_or_not
@@ -140,13 +140,14 @@ class CLI
     #choose name and put in pick folder as yes
     def self.pick_name(yn)
         Pick.create(user_id: @current_user.id,name_id: @random_name.id, yes_or_no: yn)
+        get_random_name
     end 
 
 
     def self.get_random_name
         random_name_menu
         # random_name_all(gender)
-        # like_or_not
+        like_or_not
     end
 
 

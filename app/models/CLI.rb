@@ -46,11 +46,7 @@ class CLI
 
   
      
-     def self.upload_own_name
-        puts "TO BUILD: give us your choice of name"
-        puts "TO BUILD: is this a pick or a reject?"
-     end
-     
+  
      def self.home_menu
         options = [
             {"Random name" => -> do get_random_name end},
@@ -100,6 +96,7 @@ class CLI
             {"Female names" => -> do self.random_name_all("Female") end},
             {"Male names" => -> do self.random_name_all("Male") end},
             {"Genderless names" => -> do self.random_name_all(nil) end},
+            {"Take me back to the menu" => -> do self.home_menu end}
         ]
         prompt.select("What gender are you looking for?", options)
         # define two methods for our three options
@@ -149,6 +146,24 @@ class CLI
         # random_name_all(gender)
         like_or_not
     end
+
+#------------------------------UPLOAD OWN NAME---------------------------------------------
+
+    def self.upload_own_name
+        @user_own_name = @prompt.ask("Give us your choice of name: ")
+        options = [
+                {"Female" => -> do new_name_and_pick("Female") end},
+                {"Male" => -> do new_name_and_pick("Male") end},
+            ]
+            @prompt.select("What is the gender of this name?", options)
+
+        end 
+        
+        def self.new_name_and_pick(gender)
+            new_name = Name.find_or_create_by(name: @user_own_name.to_s, gender: gender)
+            Pick.create(user_id: @current_user.id,name_id: new_name.id, yes_or_no: "Y")
+            # binding.pry
+    end 
 
 
 

@@ -56,38 +56,41 @@ class CLI
             {"Random name" => -> do get_random_name end},
             {"Show my matches" => -> do show_matches end},
             {"Upload own name" => -> do upload_own_name end},
-            {"Show my Picks" => -> do show_picks("Y") end},
-            {"Show my Rejects" => -> do show_picks("N") end},
+            {"Show my Picks" => -> do show_picks(@current_user,"Y") end},
+            {"Show my Rejects" => -> do show_picks(@current_user, "N") end},
             {"Log Out" => -> do log_out end},
             {"Delete account" => -> do delete_account end},
         ]
         @prompt.select("here are your options:", options)
      end
 #  #------------- SHOW NAMES ---------------------- 
- def self.show_picks(yn)
-    picks = Pick.where(user_id: @current_user.id, yes_or_no: yn)
+ def self.find_picks(user, yn)
+    picks = Pick.where(user_id: user.id, yes_or_no: yn)
     picks_array = picks.map {|pick| pick.name.name}
-    print picks_array
+    
  end
+
+ def self.show_picks(user,yn)
+    print find_picks(user, yn)
+ end 
 
 
  
- def self.show_matches
-    puts "TO BUILD: What's your partner username?"
-    puts "TO BUILD: here are all your matches"
+ def self.find_partner
+    partner_username= @prompt.ask("What is your partner's username?")
+    @partner_user = User.find_by(username: partner_username)
  end
+
+ def self.show_matches
+    find_partner
+    binding.pry
+    find_picks(@current_user, "Y") & find_picks(@partner_user, "Y")
+    puts "TO BUILD: here are all your matches"
+ end 
 
  #------------- RANDOM NAME ---------------------- 
 
-    #   #choose gender.  
-    # def choose_gender
-    #     menu_choice = @prompt.select('Would you like to choose choose gender?', filter:true) do |menu|
-    #         menu.choice name: 'Female', value: 1
-    #         menu.choice name: 'Male', value: 2
-    #         menu.choice name: "I don't want to choose by gender", value 3 
-    #     end 
-    # end  
-
+ 
     def self.get_random_name 
         Name.all.sample
     end 
@@ -104,10 +107,7 @@ class CLI
 
 
 
-    # def random_name_gender(gender)
-
-    # end 
-
+  
     # #choose name and put in pick folder as yes
     # def pick_name_yes(user_id, name_id, comment, rating, yes_or_no = "yes")
     #     Pick.create(user_id, name_id, comment, rating)

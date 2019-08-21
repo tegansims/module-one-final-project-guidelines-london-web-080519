@@ -33,6 +33,7 @@ class CLI
             puts "Welcome back #{user.name}! Time to find your baby's name!"
             @current_user = user 
        end 
+       #system('clear')
     end 
 
     def self.create_new_username 
@@ -54,7 +55,7 @@ class CLI
             {"Show my Picks" => -> do show_picks(@current_user,"Y") end},
             {"Show my Rejects" => -> do show_picks(@current_user, "N") end},
             {"Log Out" => -> do log_out end},
-            {"Delete account" => -> do delete_account end},
+            {"Account Settings" => -> do account_settings end},
         ]
         @prompt.select("here are your options:", options)
     end
@@ -182,7 +183,49 @@ class CLI
 
 
 #---------------------------DELETE ACCOUNT HERE---------------------------------------------
-    def self.destroy_account
+    
+def self.account_settings 
+    options = [
+        {"Update password" => -> do update_password end},
+        {"Delete account" => -> do self.delete_account end}, 
+        {"Take me back to the home menu" => -> do home_menu end}
+    ]
+    @prompt.select("What would you like to do?", options)
+end
+
+def self.update_password 
+    if verify_password?
+        new_password = @prompt.mask("Enter new password:")
+        new_password2 = @prompt.mask("Please enter it again:")
+        if new_password == new_password2 
+            @current_user.update(password: new_password)
+        else 
+            options = [
+                {"Try again" => -> do self.update_password end}, 
+                {"Take me back to the home menu" => -> do home_menu end}
+            ]
+            @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
+        end 
+    else    
+        options = [
+            {"Try again" => -> do self.update_password end}, 
+            {"Take me back to the home menu" => -> do home_menu end}
+        ]
+        @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.", options)
+    end 
+end 
+
+def self.verify_password?
+    current_password = @prompt.mask("Enter your current password:")
+    User.find_by(id: @current_user.id, password: current_password)
+end 
+
+
+
+
+
+
+def self.destroy_account
         user_delete_picks = Pick.where(user_id: @current_user.id)
         user_delete_picks.destroy_all
         User.destroy(@current_user.id)
@@ -196,6 +239,10 @@ class CLI
         ]
         @prompt.select("Are you sure? This will erase all your account info and history.", options)
     end
+
+
+
+
 
 #---------------------------LOG_OUT METHOD HERE---------------------------------------------
 

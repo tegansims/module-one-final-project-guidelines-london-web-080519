@@ -157,7 +157,7 @@ class CLI
 #------------------------------UPLOAD OWN NAME---------------------------------------------
 
     def self.upload_own_name
-        @user_own_name = @prompt.ask("Give us your choice of name: ").capitalize
+        @user_own_name = @prompt.ask("Give us your choice of name: ").strip.titleize
         options = [
                 {"Female" => -> do new_name_and_pick("Female") end},
                 {"Male" => -> do new_name_and_pick("Male") end},

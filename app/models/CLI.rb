@@ -93,6 +93,7 @@ class CLI
         else 
             puts "Here are all your rejects: #{find_picks(user, yn).sort}"
         end 
+        choose_change_picks
     end 
 
     
@@ -119,19 +120,41 @@ class CLI
         end 
     end 
 
+    def self.choose_change_picks
+        options = [
+            {"Yes" => -> do update_pick("Y") end},
+            {"No" => -> do home_menu end},
+        ]
+        @prompt.select("Do you want to change any names?", options)
+    end 
+
+    def self.update_pick(yn = "Y")
+        update_name = @prompt.ask("Which name do you want to update?").to_s
+        if already_picked(update_name)
+            update_name_id = Name.find_by(name: update_name).id
+            update_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
+            update_pick.update(yes_or_no: "N")
+            "Pick has been updated!"
+        else 
+            update_pick(yn)
+        end 
+
+    end 
+        
+
+
     #------------- RANDOM NAME ---------------------- 
 
     def self.random_name_menu
         # create array of menu choices
         #ask for gender in a menu
-        prompt = TTY::Prompt.new
         options = [
             {"Female names" => -> do self.random_name_all("Female") end},
             {"Male names" => -> do self.random_name_all("Male") end},
             {"All names" => -> do self.random_name_all(nil) end},
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
-        prompt.select("What gender are you looking for?", options)
+        @prompt.select("What gender are you looking for?", options)
         # define two methods for our three options
         # call it
     end
@@ -200,6 +223,10 @@ class CLI
         # self.find_picks(@current_user).include?(@user_own_name)    
     end 
 
+    def self.already_picked(name)
+        user_picks = find_picks(@current_user, "Y") + find_picks(@current_user, "N")
+        user_picks.include?(name)
+    end
 
 
 #---------------------------ACCOUNT SETTINGS HERE---------------------------------------------

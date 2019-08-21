@@ -24,8 +24,11 @@ class CLI
         user_password = @prompt.mask("Enter password")
         user = User.find_by(username: user_username, password: user_password)
         if !user 
-            puts "Not a valid login. Please try again"
-            self.account_login 
+            options = [
+                {"Try again" => -> do account_login  end},
+                {"Create new account" => -> do create_new_username end}
+            ]
+            @prompt.select("Not a valid login. Please try again or create new account", options)
         else 
             puts "Welcome back #{user.name}! Time to find your baby's name!"
             @current_user = user 

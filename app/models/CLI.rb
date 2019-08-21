@@ -73,18 +73,17 @@ class CLI
             {"Random name" => -> do get_random_name end},
             {"Show my matches" => -> do show_matches end},
             {"Upload own name" => -> do upload_own_name end},
-            {"Show my Picks" => -> do show_picks(@current_user,"Y") end},
-            {"Show my Rejects" => -> do show_picks(@current_user, "N") end},
+            {"Show my Picks" => -> do show_picks_runner(@current_user,"Y") end},
+            {"Show my Rejects" => -> do show_picks_runner(@current_user, "N") end},
             {"Log Out" => -> do log_out end},
             {"Account Settings" => -> do account_settings end},
         ]
         @prompt.select("here are your options:", options)
     end
 #  #------------- SHOW NAMES ---------------------- 
-    def self.find_picks(user, yn)
-        picks = Pick.where(user_id: user.id, yes_or_no: yn)
-        picks_array = picks.map {|pick| pick.name.name}
-        
+    def self.show_picks_runner(user, yn)
+        show_picks(user, yn)
+        choose_change_picks(yn)
     end
 
     def self.show_picks(user,yn)
@@ -93,8 +92,43 @@ class CLI
         else 
             puts "Here are all your rejects: #{find_picks(user, yn).sort}"
         end 
-        choose_change_picks
     end 
+
+
+    def self.find_picks(user, yn)
+        picks = Pick.where(user_id: user.id, yes_or_no: yn)
+        picks_array = picks.map {|pick| pick.name.name}
+        
+    end
+
+
+    def self.choose_change_picks(yn)
+        options = [
+            {"Yes" => -> do update_pick(yn) end},
+            {"No" => -> do home_menu end},
+        ]
+        @prompt.select("Do you want to change any names?", options)
+    end 
+
+
+    def self.update_pick(yn)
+        update_name = @prompt.ask("Which name do you want to update?").to_s.titleize
+        if already_picked(update_name)
+            update_name_id = Name.find_by(name: update_name).id
+            update_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
+            if yn == "Y"
+                update_pick.update(yes_or_no: "N")
+            else
+                update_pick.update(yes_or_no: "Y")
+            end
+            puts "Pick has been updated!"
+        else 
+            puts "Can't find that name!"
+            update_pick(yn)
+        end 
+
+    end 
+    
 
     
     def self.find_partner
@@ -118,29 +152,7 @@ class CLI
         else 
             puts "Here are all your matches: #{matches.sort}"
         end 
-    end 
-
-    def self.choose_change_picks
-        options = [
-            {"Yes" => -> do update_pick("Y") end},
-            {"No" => -> do home_menu end},
-        ]
-        @prompt.select("Do you want to change any names?", options)
-    end 
-
-    def self.update_pick(yn = "Y")
-        update_name = @prompt.ask("Which name do you want to update?").to_s
-        if already_picked(update_name)
-            update_name_id = Name.find_by(name: update_name).id
-            update_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
-            update_pick.update(yes_or_no: "N")
-            "Pick has been updated!"
-        else 
-            update_pick(yn)
-        end 
-
-    end 
-        
+    end  
 
 
     #------------- RANDOM NAME ---------------------- 
@@ -215,12 +227,12 @@ class CLI
         
     def self.new_name_and_pick(gender)
         new_name = Name.find_or_create_by(name: @user_own_name.to_s, gender: gender)
-        Pick.create(user_id: @current_user.id,name_id: new_name.id, yes_or_no: "Y")
-        # if Pick.find_by(name_id: , yes_or_no: "Y")
-        #     puts "This name is already in your picks!"
-        # elsif Pick.find_by(name: @user_own_name, yes_or_no: "N")
-        #      "this name is already in your rejects.  Would you like to move this to your picks?"
-        # self.find_picks(@current_user).include?(@user_own_name)    
+        if find_picks(@current_user, "N").include?(new_name.name)
+            puts "This name is already in your picks!"
+        else
+            Pick.find_or_create_by(user_id: @current_user.id,name_id: new_name.id, yes_or_no: "Y")
+            puts "This name has been included in your picks!"
+        end
     end 
 
     def self.already_picked(name)

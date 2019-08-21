@@ -30,10 +30,10 @@ class CLI
             ]
             @prompt.select("Not a valid login. Please try again or create new account", options)
         else 
+            system('clear')
             puts "Welcome back #{user.name}! Time to find your baby's name!"
             @current_user = user 
        end 
-       #system('clear')
     end 
 
     def self.create_new_username 
@@ -78,7 +78,7 @@ class CLI
             {"Log Out" => -> do log_out end},
             {"Account Settings" => -> do account_settings end},
         ]
-        @prompt.select("here are your options:", options)
+        @prompt.select("\nHere are your options:", options)
     end
 #  #------------- SHOW NAMES ---------------------- 
     def self.show_picks_runner(user, yn)
@@ -112,7 +112,7 @@ class CLI
 
 
     def self.update_pick(yn)
-        update_name = @prompt.ask("Which name do you want to update?").to_s.titleize
+        update_name = @prompt.ask("Which name do you want to update?").strip.to_s.titleize
         if already_picked(update_name)
             update_name_id = Name.find_by(name: update_name).id
             update_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
@@ -158,8 +158,7 @@ class CLI
     #------------- RANDOM NAME ---------------------- 
 
     def self.random_name_menu
-        # create array of menu choices
-        #ask for gender in a menu
+        self.no_names_left 
         options = [
             {"Female names" => -> do self.random_name_all("Female") end},
             {"Male names" => -> do self.random_name_all("Male") end},
@@ -167,8 +166,6 @@ class CLI
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
         @prompt.select("What gender are you looking for?", options)
-        # define two methods for our three options
-        # call it
     end
 
 
@@ -181,14 +178,22 @@ class CLI
     end
 
 
+
     def self.random_name_all(gender) 
         random_name_by_gender(gender)
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
             self.random_name_all(gender)     
         else 
-            puts "your name is #{@random_name.name}"
+            puts "Your name is #{@random_name.name}"
+            like_or_not
         end 
-        like_or_not
+    end 
+
+    def self.no_names_left 
+        if @current_user.picks.count >= Name.all.count 
+            puts "Sorry, there are no more names in the database.  Try uploading your own."
+            upload_own_name
+        end 
     end 
     #think of way to tell user that they have run out of names - B/C WILL KEEP LOOPING 
 
@@ -307,6 +312,7 @@ def self.destroy_account
     def self.methods 
         self.greet
         self.check_if_have_login_and_create
+        sleep(1)
         while @current_user
             self.home_menu
         end

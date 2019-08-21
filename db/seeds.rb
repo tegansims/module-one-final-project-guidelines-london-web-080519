@@ -27,8 +27,8 @@ require_relative "../app/models/name.rb"
     # Pick.create(user_id: 14, name_id: 506, comment: "wonderful", rating: 4, yes_or_no: "Y")
     # Pick.create(user_id: 14, name_id: 508, comment: "ew", rating: 4, yes_or_no: "N")
 
-    n = 405
-    150.times do 
-        Pick.create(user_id: 14, name_id: n, comment: "ew", rating: 4, yes_or_no: "N")
+    n = 606
+    50.times do 
+        Pick.create(user_id: 14, name_id: n, comment: "ew", rating: 1, yes_or_no: "N")
         n += 1
     end 

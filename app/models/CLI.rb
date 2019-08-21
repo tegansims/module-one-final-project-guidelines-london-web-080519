@@ -20,8 +20,8 @@ class CLI
     
 
     def self.account_login #NEED TO PUT A COUNTER IN HERE TO STOP THE LOOP IF FORGOTTEN
-        user_username = @prompt.ask("Enter username")
-        user_password = @prompt.mask("Enter password")
+        user_username = @prompt.ask("Enter username: ")
+        user_password = @prompt.mask("Enter password: ")
         user = User.find_by(username: user_username, password: user_password)
         if !user 
             options = [
@@ -38,13 +38,34 @@ class CLI
 
     def self.create_new_username 
         user_name = @prompt.ask("What is your name?")
-        username_input = @prompt.ask("Please create a username")
+        username_input = @prompt.ask("Please create a username: ")
         user = User.find_by(username: username_input)
         if !user 
-            user_password = @prompt.mask("Create a password")
-            @current_user  = User.create(username: username_input, name: user_name, password: user_password )
+            check_password_input("Enter a password: ")
+            @current_user = User.create(username: username_input, name: user_name, password: @new_password )
+        else
+            options = [
+            {"Try again" => -> do create_new_username end},
+            {"Log in with existing account" => -> do account_login end}, 
+        ]
+        @prompt.select("This username is already taken! Please try again or log in with an existing account.", options)
         end 
     end 
+
+    def self.check_password_input(message = nil)
+        @new_password = @prompt.mask(message)
+        new_password2 = @prompt.mask("Please enter it again:")
+        if @new_password != new_password2 
+            options = [
+                {"Try again" => -> do self.check_password_input(message) end}, 
+                {"Take me back to the home menu" => -> do home_menu end}
+            ]
+            @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
+        end 
+    end 
+
+
+
 
   
     def self.home_menu
@@ -128,7 +149,6 @@ class CLI
     def self.random_name_all(gender) 
         random_name_by_gender(gender)
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
-            puts "re-running"
             self.random_name_all(gender)     
         else 
             puts "your name is #{@random_name.name}"
@@ -182,7 +202,7 @@ class CLI
 
 
 
-#---------------------------DELETE ACCOUNT HERE---------------------------------------------
+#---------------------------ACCOUNT SETTINGS HERE---------------------------------------------
     
 def self.account_settings 
     options = [
@@ -194,30 +214,21 @@ def self.account_settings
 end
 
 def self.update_password 
-    if verify_password?
-        new_password = @prompt.mask("Enter new password:")
-        new_password2 = @prompt.mask("Please enter it again:")
-        if new_password == new_password2 
-            @current_user.update(password: new_password)
-        else 
-            options = [
-                {"Try again" => -> do self.update_password end}, 
-                {"Take me back to the home menu" => -> do home_menu end}
-            ]
-            @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
-        end 
-    else    
+    verify_password
+    check_password_input("Enter a new password: ")
+    @current_user.update(password: @new_password)
+      
+end 
+
+def self.verify_password
+    current_password = @prompt.mask("Enter your current password:")
+    if !User.find_by(id: @current_user.id, password: current_password)
         options = [
-            {"Try again" => -> do self.update_password end}, 
+            {"Try again" => -> do self.verify_password end}, 
             {"Take me back to the home menu" => -> do home_menu end}
         ]
         @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.", options)
     end 
-end 
-
-def self.verify_password?
-    current_password = @prompt.mask("Enter your current password:")
-    User.find_by(id: @current_user.id, password: current_password)
 end 
 
 
@@ -226,9 +237,11 @@ end
 
 
 def self.destroy_account
+    verify_password
         user_delete_picks = Pick.where(user_id: @current_user.id)
         user_delete_picks.destroy_all
         User.destroy(@current_user.id)
+        puts "Your account has been succesfully deleted."
         log_out
     end
 

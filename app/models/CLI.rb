@@ -1,4 +1,5 @@
 require "tty-prompt"
+require  "colorize"
 
 class CLI 
 
@@ -6,7 +7,7 @@ class CLI
     @current_user = nil 
 
     def self.greet 
-       puts "Welcome to Kindr!"
+       puts "Welcome to Kindr!".light_green.bold
     end 
 
 
@@ -69,16 +70,18 @@ class CLI
 
 
     def self.home_menu
+        sleep(1.1)
+        system('clear')
         options = [
             {"Random name" => -> do get_random_name end},
-            {"Show my matches" => -> do show_matches end},
             {"Upload own name" => -> do upload_own_name end},
+            {"Show my Matches" => -> do show_matches end},
             {"Show my Picks" => -> do show_picks_runner(@current_user,"Y") end},
             {"Show my Rejects" => -> do show_picks_runner(@current_user, "N") end},
             {"Log Out" => -> do log_out end},
             {"Account Settings" => -> do account_settings end},
         ]
-        @prompt.select("\nHere are your options: ", options, per_page: 7)
+        @prompt.select("Here are your options: ", options, per_page: 7)
     end
 
 
@@ -93,9 +96,9 @@ class CLI
 
     def self.show_picks(user,yn)
         if yn == "Y"
-            puts "Here are all your picks: "        
+            puts "Here are all your Picks: "        
         else 
-            puts "Here are all your rejects: "
+            puts "Here are all your Rejects: "
         end 
         find_picks(user, yn).each {|name| puts name}
     end 
@@ -106,18 +109,12 @@ class CLI
         picks_array = picks.map {|pick| pick.name.name}.sort
     end
 
-    # def self.print_picks(user, yn)
-    #     puts "print_picks starts here"
-    #     find_picks(user, yn).each {|name| puts name}
-    # end 
-
-
     def self.choose_change_picks(yn)
         options = [
             {"Yes" => -> do update_pick(yn) end},
             {"No" => -> do home_menu end},
         ]
-        @prompt.select("Do you want to change any names?", options)
+        @prompt.select("\nDo you want to change any names?", options)
     end 
 
 
@@ -131,13 +128,6 @@ class CLI
         if already_picked(update_name)
             update_name_id = Name.find_by(name: update_name)
             update_new_name_pick(update_name_id, yn)
-            # update_this_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
-            # if yn == "Y"
-            #     update_this_pick.update(yes_or_no: "N")
-            # else
-            #     update_this_pick.update(yes_or_no: "Y")
-            # end
-            # puts "Pick has been updated!"
         else 
             puts "Can't find that name!"
             update_pick(yn)
@@ -165,24 +155,30 @@ class CLI
         find_partner
         matches = find_picks(@current_user, "Y") & find_picks(@partner_user, "Y")
         if matches.empty?
-            puts "Sorry, you and your partner do not yet have any matches."
+            puts "Sorry, you and your partner do not yet have any Matches."
         else 
-            puts "Here are all your matches: "
-            matches.each {|name| puts name}.sort
+            puts "\nHere are all your Matches: "
+            matches.each {|name| puts name.yellow.bold}.sort
         end 
+        options = [
+            {"Let's go!" => -> do home_menu  end},
+        ]
+        @prompt.select("\nBack to home menu?", options, per_page: 7)
+    
     end  
 
 
     #------------- RANDOM NAME ---------------------- 
 
     def self.random_name_menu 
+        system('clear')
         options = [
             {"Female names" => -> do random_name_all("Female") end},
             {"Male names" => -> do random_name_all("Male") end},
             {"All names" => -> do random_name_all(nil) end},
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
-        @prompt.select("\nWhat gender are you looking for?", options)
+        @prompt.select("What gender are you looking for?", options)
     end
 
 
@@ -201,7 +197,8 @@ class CLI
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
             random_name_all(gender)     
         else 
-            puts "\nYour name is #{@random_name.name}"
+            system('clear')
+            puts "Your name is " + @random_name.name.yellow.bold
             like_or_not
         end 
     end 
@@ -338,9 +335,11 @@ def self.destroy_account
 #---------------------------RUN METHOD HERE---------------------------------------------
 
     def self.methods 
+        system('clear')
+        kindr
         self.greet
         self.check_if_have_login_and_create
-        sleep(1)
+      
         while @current_user
             self.home_menu
         end
@@ -352,4 +351,11 @@ def self.destroy_account
         @current_user = User.find(user.id)
     end
 
- end
+ 
+
+ def self.kindr 
+    font = TTY::Font.new(:standard)
+    puts font.write("kindr").yellow
+ end 
+
+end

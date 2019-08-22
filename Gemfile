@@ -11,3 +11,6 @@ gem "rake"
 gem "database_cleaner"
 gem 'faker'
 gem 'tty-prompt'
+gem 'colorize'
+gem 'pastel'
+gem 'tty-font'

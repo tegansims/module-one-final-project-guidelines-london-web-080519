@@ -74,9 +74,13 @@ class CLI
             {"Log Out" => -> do log_out end},
             {"Account Settings" => -> do account_settings end},
         ]
-        @prompt.select("\nHere are your options:", options)
+        @prompt.select("\nHere are your options:", options, per_page: 7)
     end
+
+
 #  #------------- SHOW NAMES ---------------------- 
+
+
     def self.show_picks_runner(user, yn)
         show_picks(user, yn)
         choose_change_picks(yn)
@@ -84,18 +88,23 @@ class CLI
 
     def self.show_picks(user,yn)
         if yn == "Y"
-            puts "Here are all your picks: #{find_picks(user, yn).sort}"
+            puts "Here are all your picks:"        
         else 
-            puts "Here are all your rejects: #{find_picks(user, yn).sort}"
+            puts "Here are all your rejects:"
         end 
+        find_picks(user, yn).each {|name| puts name}
     end 
 
 
     def self.find_picks(user, yn)
         picks = Pick.where(user_id: user.id, yes_or_no: yn)
-        picks_array = picks.map {|pick| pick.name.name}
-        
+        picks_array = picks.map {|pick| pick.name.name}.sort
     end
+
+    # def self.print_picks(user, yn)
+    #     puts "print_picks starts here"
+    #     find_picks(user, yn).each {|name| puts name}
+    # end 
 
 
     def self.choose_change_picks(yn)
@@ -221,7 +230,7 @@ class CLI
 #------------------------------UPLOAD OWN NAME---------------------------------------------
 
     def self.upload_own_name
-        @user_own_name = @prompt.ask("Give us your choice of name: ").strip.titleize
+        @user_own_name = @prompt.ask("Give us your choice of name: ").strip.gsub('"', '').titleize
         options = [
                 {"Female" => -> do new_name_and_pick("Female") end},
                 {"Male" => -> do new_name_and_pick("Male") end},
@@ -233,7 +242,7 @@ class CLI
     def self.new_name_and_pick(gender)
         new_name = Name.find_or_create_by(name: @user_own_name.to_s, gender: gender)
         if find_picks(@current_user, "N").include?(new_name.name)
-            puts "This name is already in your picks!"
+            puts "This name is already in your rejects!"
         else
             Pick.find_or_create_by(user_id: @current_user.id,name_id: new_name.id, yes_or_no: "Y")
             puts "This name has been included in your picks!"

@@ -124,14 +124,15 @@ class CLI
     def self.update_pick(yn)
         update_name = @prompt.ask("Which name do you want to update?").strip.to_s.titleize
         if already_picked(update_name)
-            update_name_id = Name.find_by(name: update_name).id
-            update_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
-            if yn == "Y"
-                update_pick.update(yes_or_no: "N")
-            else
-                update_pick.update(yes_or_no: "Y")
-            end
-            puts "Pick has been updated!"
+            update_name_id = Name.find_by(name: update_name)
+            update_new_name_pick(update_name_id, yn)
+            # update_this_pick = Pick.where(user_id: @current_user.id, name_id: update_name_id)
+            # if yn == "Y"
+            #     update_this_pick.update(yes_or_no: "N")
+            # else
+            #     update_this_pick.update(yes_or_no: "Y")
+            # end
+            # puts "Pick has been updated!"
         else 
             puts "Can't find that name!"
             update_pick(yn)
@@ -143,7 +144,7 @@ class CLI
     
     def self.find_partner
         partner_username= @prompt.ask("What is your partner's username?")
-        if User.find_by(username: partner_username)
+        if User.find_by(username: partner_username) 
             @partner_user = User.find_by(username: partner_username)
         else 
             options = [
@@ -243,6 +244,11 @@ class CLI
         new_name = Name.find_or_create_by(name: @user_own_name.to_s, gender: gender)
         if find_picks(@current_user, "N").include?(new_name.name)
             puts "This name is already in your rejects!"
+            options = [
+                {"Yes" => -> do update_new_name_pick(new_name, "N") end},
+                {"No" => -> do home_menu end},
+            ]
+            @prompt.select("Do you want to change this to a pick?", options)
         else
             Pick.find_or_create_by(user_id: @current_user.id,name_id: new_name.id, yes_or_no: "Y")
             puts "This name has been included in your picks!"
@@ -250,6 +256,15 @@ class CLI
     end 
 
 
+    def self.update_new_name_pick(name, yn)
+        update_this_pick = Pick.where(user_id: @current_user.id, name_id: name.id)
+        if yn == "Y"
+            update_this_pick.update(yes_or_no: "N")
+        else
+            update_this_pick.update(yes_or_no: "Y")
+        end
+        puts "Pick has been updated!"
+    end 
 
 #---------------------------ACCOUNT SETTINGS HERE---------------------------------------------
     

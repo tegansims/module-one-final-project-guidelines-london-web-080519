@@ -6,6 +6,12 @@ class CLI
     @prompt = TTY::Prompt.new
     @current_user = nil 
 
+    def self.kindr 
+        font = TTY::Font.new(:standard)
+        puts font.write("kindr").yellow
+     end 
+
+
     def self.greet 
        puts "Welcome to Kindr!".light_green.bold
     end 
@@ -29,7 +35,7 @@ class CLI
                 {"Try again" => -> do account_login  end},
                 {"Create new account" => -> do create_new_username end}
             ]
-            @prompt.select("Not a valid login. Please try again or create new account", options)
+            @prompt.select("Not a valid login. Please try again or create new account".light_red, options)
         else 
             system('clear')
             puts "Welcome back #{user.name}! Time to find your baby's name!"
@@ -49,7 +55,7 @@ class CLI
             {"Try again" => -> do create_new_username end},
             {"Log in with existing account" => -> do account_login end}, 
         ]
-        @prompt.select("This username is already taken! Please try again or log in with an existing account.", options)
+        @prompt.select("This username is already taken! Please try again or log in with an existing account.".light_red, options)
         end 
     end 
 
@@ -61,7 +67,7 @@ class CLI
                 {"Try again" => -> do self.check_password_input(message) end}, 
                 {"Take me back to the home menu" => -> do home_menu end}
             ]
-            @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
+            @prompt.select("Passwords do not match.  Please try again or return to homepage.".light_red, options)
         end 
     end 
 
@@ -129,7 +135,7 @@ class CLI
             update_name_id = Name.find_by(name: update_name)
             update_new_name_pick(update_name_id, yn)
         else 
-            puts "Can't find that name!"
+            puts "Can't find that name!".light_red
             update_pick(yn)
         end 
 
@@ -147,7 +153,7 @@ class CLI
                 {"Try again" => -> do find_partner end},
                 {"Go back to home menu" => -> do home_menu end}
             ]
-            @prompt.select("Invalid username.  Please try again or return to home menu", options)
+            @prompt.select("Invalid username.  Please try again or return to home menu".light_red, options)
         end 
     end
 
@@ -296,7 +302,7 @@ def self.verify_password
             {"Try again" => -> do self.verify_password end}, 
             {"Take me back to the home menu" => -> do home_menu end}
         ]
-        @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.", options)
+        @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.".light_red, options)
     end 
 end 
 
@@ -319,7 +325,7 @@ def self.destroy_account
             {"Yes, please delete my account" => -> do destroy_account end},
             {"No, please take me back to the menu!" => -> do self.home_menu end}
         ]
-        @prompt.select("Are you sure? This will erase all your account info and history.", options)
+        @prompt.select("Are you sure? This will erase all your account info and history.".light_red, options)
     end
 
 
@@ -330,6 +336,8 @@ def self.destroy_account
 
     def self.log_out
         puts "\nThank you for using Kindr! See you again soon."
+        font = TTY::Font.new(:standard)
+        puts font.write("Goodbye!").yellow
         @current_user = nil
     end
 #---------------------------RUN METHOD HERE---------------------------------------------
@@ -345,17 +353,8 @@ def self.destroy_account
         end
     end 
 
-    private
-
-    def update_current_user(user)
-        @current_user = User.find(user.id)
-    end
-
  
 
- def self.kindr 
-    font = TTY::Font.new(:standard)
-    puts font.write("kindr").yellow
- end 
+
 
 end

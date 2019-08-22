@@ -7,7 +7,7 @@ class CLI
     @current_user = nil 
 
     def self.greet 
-       puts "Welcome to Kindr!".light_green.bold
+       puts "Welcome to Kindr, the naming choosing app!".light_green.bold
     end 
 
 
@@ -21,15 +21,15 @@ class CLI
     
 
     def self.account_login 
-        user_username = @prompt.ask("Enter username: ")
-        user_password = @prompt.mask("Enter password: ")
+        user_username = @prompt.ask("Enter username: ", required: true)
+        user_password = @prompt.mask("Enter password: ", required: true)
         user = User.find_by(username: user_username, password: user_password)
         if !user 
             options = [
                 {"Try again" => -> do account_login  end},
                 {"Create new account" => -> do create_new_username end}
             ]
-            @prompt.select("Not a valid login. Please try again or create new account", options)
+            @prompt.select("Not a valid login. Please try again or create new account".light_red, options)
         else 
             system('clear')
             puts "Welcome back #{user.name}! Time to find your baby's name!"
@@ -38,18 +38,18 @@ class CLI
     end 
 
     def self.create_new_username 
-        user_name = @prompt.ask("What is your name?")
-        username_input = @prompt.ask("Please create a username: ")
+        user_name = @prompt.ask("What is your name?", required: true)
+        username_input = @prompt.ask("Please create a username: ", required: true)
         user = User.find_by(username: username_input)
         if !user 
-            check_password_input("Enter a password: ")
+            check_password_input("Enter a password: ", required: true)
             @current_user = User.create(username: username_input, name: user_name, password: @new_password )
         else
             options = [
             {"Try again" => -> do create_new_username end},
             {"Log in with existing account" => -> do account_login end}, 
         ]
-        @prompt.select("This username is already taken! Please try again or log in with an existing account.", options)
+        @prompt.select("This username is already taken! Please try again or log in with an existing account.".light_red, options)
         end 
     end 
 
@@ -61,7 +61,7 @@ class CLI
                 {"Try again" => -> do self.check_password_input(message) end}, 
                 {"Take me back to the home menu" => -> do home_menu end}
             ]
-            @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
+            @prompt.select("Passwords do not match.  Please try again or return to homepage.".light_red, options)
         end 
     end 
 
@@ -129,7 +129,7 @@ class CLI
             update_name_id = Name.find_by(name: update_name)
             update_new_name_pick(update_name_id, yn)
         else 
-            puts "Can't find that name!"
+            puts "Can't find that name!".light_red
             update_pick(yn)
         end 
 
@@ -147,7 +147,7 @@ class CLI
                 {"Try again" => -> do find_partner end},
                 {"Go back to home menu" => -> do home_menu end}
             ]
-            @prompt.select("Invalid username.  Please try again or return to home menu", options)
+            @prompt.select("Invalid username.  Please try again or return to home menu".light_red, options)
         end 
     end
 
@@ -236,7 +236,7 @@ class CLI
 
     def self.upload_own_name
         puts "\n"
-        @user_own_name = @prompt.ask("Give us your choice of name: ").strip.gsub('"', '').titleize
+        @user_own_name = @prompt.ask("Give us your choice of name: ", required: true).strip.gsub('"', '').titleize
         options = [
                 {"Female" => -> do new_name_and_pick("Female") end},
                 {"Male" => -> do new_name_and_pick("Male") end},
@@ -296,7 +296,7 @@ def self.verify_password
             {"Try again" => -> do self.verify_password end}, 
             {"Take me back to the home menu" => -> do home_menu end}
         ]
-        @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.", options)
+        @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.".light_red, options)
     end 
 end 
 
@@ -319,7 +319,7 @@ def self.destroy_account
             {"Yes, please delete my account" => -> do destroy_account end},
             {"No, please take me back to the menu!" => -> do self.home_menu end}
         ]
-        @prompt.select("Are you sure? This will erase all your account info and history.", options)
+        @prompt.select("Are you sure? This will erase all your account info and history.".light_red, options)
     end
 
 
@@ -329,6 +329,8 @@ def self.destroy_account
 #---------------------------LOG_OUT METHOD HERE---------------------------------------------
 
     def self.log_out
+        font = TTY::Font.new(:standard)
+        puts font.write("Goodbye!").yellow
         puts "\nThank you for using Kindr! See you again soon."
         @current_user = nil
     end

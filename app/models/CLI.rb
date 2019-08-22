@@ -19,7 +19,7 @@ class CLI
     end
     
 
-    def self.account_login #NEED TO PUT A COUNTER IN HERE TO STOP THE LOOP IF FORGOTTEN
+    def self.account_login 
         user_username = @prompt.ask("Enter username: ")
         user_password = @prompt.mask("Enter password: ")
         user = User.find_by(username: user_username, password: user_password)
@@ -64,10 +64,6 @@ class CLI
         end 
     end 
 
-
-
-
-  
     def self.home_menu
         options = [
             {"Random name" => -> do get_random_name end},
@@ -110,6 +106,11 @@ class CLI
         @prompt.select("Do you want to change any names?", options)
     end 
 
+
+    def self.already_picked(name)
+        user_picks = find_picks(@current_user, "Y") + find_picks(@current_user, "N")
+        user_picks.include?(name)
+    end
 
     def self.update_pick(yn)
         update_name = @prompt.ask("Which name do you want to update?").strip.to_s.titleize
@@ -157,12 +158,11 @@ class CLI
 
     #------------- RANDOM NAME ---------------------- 
 
-    def self.random_name_menu
-        self.no_names_left 
+    def self.random_name_menu 
         options = [
-            {"Female names" => -> do self.random_name_all("Female") end},
-            {"Male names" => -> do self.random_name_all("Male") end},
-            {"All names" => -> do self.random_name_all(nil) end},
+            {"Female names" => -> do random_name_all("Female") end},
+            {"Male names" => -> do random_name_all("Male") end},
+            {"All names" => -> do random_name_all(nil) end},
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
         @prompt.select("What gender are you looking for?", options)
@@ -182,20 +182,16 @@ class CLI
     def self.random_name_all(gender) 
         random_name_by_gender(gender)
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
-            self.random_name_all(gender)     
+            random_name_all(gender)     
         else 
             puts "Your name is #{@random_name.name}"
             like_or_not
         end 
     end 
 
-    def self.no_names_left 
-        if @current_user.picks.count >= Name.all.count 
-            puts "Sorry, there are no more names in the database.  Try uploading your own."
-            upload_own_name
-        end 
+    def self.no_names_left?
+        @current_user.picks.count >= Name.all.count 
     end 
-    #think of way to tell user that they have run out of names - B/C WILL KEEP LOOPING 
 
     def self.like_or_not
         options = [
@@ -206,16 +202,20 @@ class CLI
         @prompt.select("Do you like this name?", options)
     end
 
-    #choose name and put in pick folder as yes
     def self.pick_name(yn)
         Pick.create(user_id: @current_user.id,name_id: @random_name.id, yes_or_no: yn)
         get_random_name
     end 
 
 
+
     def self.get_random_name
+        if no_names_left?
+        puts "Sorry, there are no more names in the database.  Try uploading your own."
+        upload_own_name
+        else 
         random_name_menu
-        # random_name_all(gender)
+        end 
     end
 
 #------------------------------UPLOAD OWN NAME---------------------------------------------
@@ -240,10 +240,6 @@ class CLI
         end
     end 
 
-    def self.already_picked(name)
-        user_picks = find_picks(@current_user, "Y") + find_picks(@current_user, "N")
-        user_picks.include?(name)
-    end
 
 
 #---------------------------ACCOUNT SETTINGS HERE---------------------------------------------
@@ -318,5 +314,10 @@ def self.destroy_account
         end
     end 
 
+    private
+
+    def update_current_user(user)
+        @current_user = User.find(user.id)
+    end
 
  end

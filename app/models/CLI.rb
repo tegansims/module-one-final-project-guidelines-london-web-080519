@@ -15,7 +15,7 @@ class CLI
             {"Yes" => -> do self.account_login  end},
             {"No" => -> do self.create_new_username end},
         ]
-        @prompt.select("Do you have an account with Kindr?", options)
+        @prompt.select("\nDo you have an account with Kindr?", options)
     end
     
 
@@ -54,7 +54,7 @@ class CLI
 
     def self.check_password_input(message = nil)
         @new_password = @prompt.mask(message)
-        new_password2 = @prompt.mask("Please enter it again:")
+        new_password2 = @prompt.mask("Please enter it again: ")
         if @new_password != new_password2 
             options = [
                 {"Try again" => -> do self.check_password_input(message) end}, 
@@ -63,6 +63,10 @@ class CLI
             @prompt.select("Passwords do not match.  Please try again or return to homepage.", options)
         end 
     end 
+
+
+#  #------------- HOME MENU ----------------------     
+
 
     def self.home_menu
         options = [
@@ -74,7 +78,7 @@ class CLI
             {"Log Out" => -> do log_out end},
             {"Account Settings" => -> do account_settings end},
         ]
-        @prompt.select("\nHere are your options:", options, per_page: 7)
+        @prompt.select("\nHere are your options: ", options, per_page: 7)
     end
 
 
@@ -82,15 +86,16 @@ class CLI
 
 
     def self.show_picks_runner(user, yn)
+        puts "\n"
         show_picks(user, yn)
         choose_change_picks(yn)
     end
 
     def self.show_picks(user,yn)
         if yn == "Y"
-            puts "Here are all your picks:"        
+            puts "Here are all your picks: "        
         else 
-            puts "Here are all your rejects:"
+            puts "Here are all your rejects: "
         end 
         find_picks(user, yn).each {|name| puts name}
     end 
@@ -143,6 +148,7 @@ class CLI
 
     
     def self.find_partner
+        puts "\n"
         partner_username= @prompt.ask("What is your partner's username?")
         if User.find_by(username: partner_username) 
             @partner_user = User.find_by(username: partner_username)
@@ -161,7 +167,8 @@ class CLI
         if matches.empty?
             puts "Sorry, you and your partner do not yet have any matches."
         else 
-            puts "Here are all your matches: #{matches.sort}"
+            puts "Here are all your matches: "
+            matches.each {|name| puts name}.sort
         end 
     end  
 
@@ -175,7 +182,7 @@ class CLI
             {"All names" => -> do random_name_all(nil) end},
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
-        @prompt.select("What gender are you looking for?", options)
+        @prompt.select("\nWhat gender are you looking for?", options)
     end
 
 
@@ -194,7 +201,7 @@ class CLI
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
             random_name_all(gender)     
         else 
-            puts "Your name is #{@random_name.name}"
+            puts "\nYour name is #{@random_name.name}"
             like_or_not
         end 
     end 
@@ -209,7 +216,7 @@ class CLI
             {"No" => -> do self.pick_name("N") end},
             {"Take me back to the menu" => -> do self.home_menu end}
         ]
-        @prompt.select("Do you like this name?", options)
+        @prompt.select("\nDo you like this name?", options)
     end
 
     def self.pick_name(yn)
@@ -221,7 +228,7 @@ class CLI
 
     def self.get_random_name
         if no_names_left?
-        puts "Sorry, there are no more names in the database.  Try uploading your own."
+        puts "\nSorry, there are no more names in the database.  Try uploading your own."
         upload_own_name
         else 
         random_name_menu
@@ -231,6 +238,7 @@ class CLI
 #------------------------------UPLOAD OWN NAME---------------------------------------------
 
     def self.upload_own_name
+        puts "\n"
         @user_own_name = @prompt.ask("Give us your choice of name: ").strip.gsub('"', '').titleize
         options = [
                 {"Female" => -> do new_name_and_pick("Female") end},
@@ -274,7 +282,7 @@ def self.account_settings
         {"Delete account" => -> do self.delete_account end}, 
         {"Take me back to the home menu" => -> do home_menu end}
     ]
-    @prompt.select("What would you like to do?", options)
+    @prompt.select("\nWhat would you like to do?", options)
 end
 
 def self.update_password 
@@ -285,7 +293,7 @@ def self.update_password
 end 
 
 def self.verify_password
-    current_password = @prompt.mask("Enter your current password:")
+    current_password = @prompt.mask("Enter your current password: ")
     if !User.find_by(id: @current_user.id, password: current_password)
         options = [
             {"Try again" => -> do self.verify_password end}, 
@@ -324,7 +332,7 @@ def self.destroy_account
 #---------------------------LOG_OUT METHOD HERE---------------------------------------------
 
     def self.log_out
-        puts "Thank you for using Kindr! See you again soon."
+        puts "\nThank you for using Kindr! See you again soon."
         @current_user = nil
     end
 #---------------------------RUN METHOD HERE---------------------------------------------

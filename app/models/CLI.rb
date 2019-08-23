@@ -69,6 +69,7 @@ class CLI
             ]
             @prompt.select("Passwords do not match.  Please try again or return to homepage.".light_red, options)
         end 
+        @new_password == new_password2
     end 
 
 
@@ -292,8 +293,8 @@ end
 def self.update_password
     verify_password
     if check_password_input("Enter a new password: ")
-        @current_user.update(password: @new_password) 
-    end
+    @current_user.update(password: @new_password) 
+    end 
 end 
 
 def self.verify_password

@@ -1,4 +1,4 @@
 require_relative '../config/environment'
 
 
-CLI.methods
+CLI.methods 

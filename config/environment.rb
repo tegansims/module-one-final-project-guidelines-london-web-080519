@@ -2,6 +2,9 @@ require 'bundler'
 require "sinatra/activerecord"
 require 'faker' 
 require 'tty-prompt'
+require 'colorize'
+require 'pastel'
+require 'tty-font'
 
 Bundler.require
 

@@ -157,6 +157,7 @@ class CLI
         end 
     end
 
+
     def self.show_matches
         find_partner
         matches = find_picks(@current_user, "Y") & find_picks(@partner_user, "Y")
@@ -187,17 +188,6 @@ class CLI
         @prompt.select("What gender are you looking for?", options)
     end
 
-
-    def self.random_name_by_gender(gender)
-        if gender
-            @random_name = Name.where(gender:gender).sample
-        else
-            @random_name = Name.all.sample
-        end
-    end
-
-
-
     def self.random_name_all(gender) 
         random_name_by_gender(gender)
         if Pick.find_by(user_id: @current_user.id, name_id: @random_name.id)
@@ -209,9 +199,20 @@ class CLI
         end 
     end 
 
+
+    def self.random_name_by_gender(gender)
+        if gender
+            @random_name = Name.where(gender:gender).sample
+        else
+            @random_name = Name.all.sample
+        end
+    end
+
+
     def self.no_names_left?
         @current_user.picks.count >= Name.all.count 
     end 
+
 
     def self.like_or_not
         options = [
@@ -288,11 +289,11 @@ def self.account_settings
     @prompt.select("\nWhat would you like to do?", options)
 end
 
-def self.update_password 
+def self.update_password
     verify_password
-    check_password_input("Enter a new password: ")
-    @current_user.update(password: @new_password)
-      
+    if check_password_input("Enter a new password: ")
+        @current_user.update(password: @new_password) 
+    end
 end 
 
 def self.verify_password
@@ -305,10 +306,6 @@ def self.verify_password
         @prompt.select("Current password is incorrect.  Please enter it again or return to homepage.".light_red, options)
     end 
 end 
-
-
-
-
 
 
 def self.destroy_account
@@ -330,8 +327,6 @@ def self.destroy_account
 
 
 
-
-
 #---------------------------LOG_OUT METHOD HERE---------------------------------------------
 
     def self.log_out
@@ -340,6 +335,7 @@ def self.destroy_account
         puts font.write("Goodbye!").yellow
         @current_user = nil
     end
+
 #---------------------------RUN METHOD HERE---------------------------------------------
 
     def self.methods 
@@ -347,7 +343,6 @@ def self.destroy_account
         kindr
         self.greet
         self.check_if_have_login_and_create
-      
         while @current_user
             self.home_menu
         end
